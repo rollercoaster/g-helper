@@ -49,22 +49,32 @@ namespace GHelper
             labelBIOS.Text = "BIOS";
             labelDrivers.Text = Properties.Strings.DriverAndSoftware;
 
+            labelLegend.Text = Properties.Strings.Legend;
+            labelLegendGray.Text = Properties.Strings.LegendGray;
+            labelLegendRed.Text = Properties.Strings.LegendRed;
+            labelLegendGreen.Text = Properties.Strings.LegendGreen;
+
             SuspendLayout();
 
             tableBios.Visible = false;
             tableDrivers.Visible = false;
 
+            labelLegendGreen.BackColor = colorEco;
+            labelLegendRed.BackColor = colorTurbo;
+
             ClearTable(tableBios);
             ClearTable(tableDrivers);
 
+            string rogParam = AppConfig.IsROG() ? "&systemCode=rog" : "";
+
             Task.Run(async () =>
             {
-                DriversAsync($"https://rog.asus.com/support/webapi/product/GetPDBIOS?website=global&model={model}&cpu=", 1, tableBios);
+                DriversAsync($"https://rog.asus.com/support/webapi/product/GetPDBIOS?website=global&model={model}&cpu={model}{rogParam}", 1, tableBios);
             });
 
             Task.Run(async () =>
             {
-                DriversAsync($"https://rog.asus.com/support/webapi/product/GetPDDrivers?website=global&model={model}&cpu={model}&osid=52", 0, tableDrivers);
+                DriversAsync($"https://rog.asus.com/support/webapi/product/GetPDDrivers?website=global&model={model}&cpu={model}&osid=52{rogParam}", 0, tableDrivers);
             });
         }
 
@@ -150,6 +160,7 @@ namespace GHelper
                 table.Controls.Add(new Label { Text = driver.date, Anchor = AnchorStyles.Left, Dock = DockStyle.Fill, Padding = new Padding(5, 5, 5, 5) }, 2, table.RowCount);
                 table.Controls.Add(versionLabel, 3, table.RowCount);
                 table.RowCount++;
+
             });
         }
 
@@ -163,11 +174,13 @@ namespace GHelper
             });
         }
 
-        private void _VisualiseNewDriver(int position, int newer, TableLayoutPanel table)
+        private void _VisualiseNewDriver(int position, int newer, string tip, TableLayoutPanel table)
         {
             var label = table.GetControlFromPosition(3, position) as LinkLabel;
             if (label != null)
             {
+                toolTip.SetToolTip(label, tip);
+
                 if (newer == DRIVER_NEWER)
                 {
                     label.AccessibleName = label.AccessibleName + Properties.Strings.NewUpdates;
@@ -180,35 +193,44 @@ namespace GHelper
             }
         }
 
-        public void VisualiseNewDriver(int position, int newer, TableLayoutPanel table)
+        public void VisualiseNewDriver(int position, int newer, string tip, TableLayoutPanel table)
         {
             if (InvokeRequired)
             {
                 Invoke(delegate
                 {
-                    _VisualiseNewDriver(position, newer, table);
+                    _VisualiseNewDriver(position, newer, tip, table);
                 });
             }
             else
             {
-                _VisualiseNewDriver(position, newer, table);
+                _VisualiseNewDriver(position, newer, tip, table);
             }
 
         }
 
         public void VisualiseNewCount(int updatesCount, TableLayoutPanel table)
         {
-            Invoke(delegate
+            if (InvokeRequired)
             {
-                labelUpdates.Text = $"{Properties.Strings.NewUpdates}: {updatesCount}";
-                labelUpdates.ForeColor = colorTurbo;
-                labelUpdates.Font = new Font(labelUpdates.Font, FontStyle.Bold);
-
-                panelBios.AccessibleName = labelUpdates.Text;
-
-            });
+                Invoke(delegate
+                {
+                    _VisualiseNewCount(updatesCount, table);
+                });
+            }
+            else
+            {
+                _VisualiseNewCount(updatesCount, table);
+            }
         }
 
+        public void _VisualiseNewCount(int updatesCount, TableLayoutPanel table)
+        {
+            labelUpdates.Text = $"{Properties.Strings.NewUpdates}: {updatesCount}";
+            labelUpdates.ForeColor = colorTurbo;
+            labelUpdates.Font = new Font(labelUpdates.Font, FontStyle.Bold);
+            panelBios.AccessibleName = labelUpdates.Text;
+        }
 
         static string CleanupDeviceId(string input)
         {
@@ -230,11 +252,23 @@ namespace GHelper
                     AutomaticDecompression = DecompressionMethods.All
                 }))
                 {
+                    Logger.WriteLine(url);
                     httpClient.DefaultRequestHeaders.AcceptEncoding.ParseAdd("gzip, deflate, br");
                     httpClient.DefaultRequestHeaders.Add("User-Agent", "C# App");
                     var json = await httpClient.GetStringAsync(url);
 
                     var data = JsonSerializer.Deserialize<JsonElement>(json);
+                    var result = data.GetProperty("Result");
+
+                    // fallback for bugged API
+                    if (result.ToString() == "" || result.GetProperty("Obj").GetArrayLength() == 0)
+                    {
+                        var urlFallback = url + "&tag=" + new Random().Next(10, 99);
+                        Logger.WriteLine(urlFallback);
+                        json = await httpClient.GetStringAsync(urlFallback);
+                        data = JsonSerializer.Deserialize<JsonElement>(json);
+                    }
+
                     var groups = data.GetProperty("Result").GetProperty("Obj");
 
 
@@ -285,6 +319,8 @@ namespace GHelper
                     foreach (var driver in drivers)
                     {
                         int newer = DRIVER_NOT_FOUND;
+                        string tip = driver.version;
+
                         if (type == 0 && driver.hardwares.ToString().Length > 0)
                             for (int k = 0; k < driver.hardwares.GetArrayLength(); k++)
                             {
@@ -295,14 +331,18 @@ namespace GHelper
                                 {
                                     newer = Math.Min(newer, new Version(driver.version).CompareTo(new Version(localVersion)));
                                     Logger.WriteLine(driver.title + " " + deviceID + " " + driver.version + " vs " + localVersion + " = " + newer);
+                                    tip = "Download: " + driver.version + "\n" + "Installed: " + localVersion;
                                 }
 
                             }
 
                         if (type == 1)
+                        {
                             newer = Int32.Parse(driver.version) > Int32.Parse(bios) ? 1 : -1;
+                            tip = "Download: " + driver.version + "\n" + "Installed: " + bios;
+                        }
 
-                        VisualiseNewDriver(count, newer, table);
+                        VisualiseNewDriver(count, newer, tip, table);
 
                         if (newer == DRIVER_NEWER)
                         {

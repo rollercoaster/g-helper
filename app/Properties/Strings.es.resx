@@ -506,6 +506,9 @@
   <data name="Lighting" xml:space="preserve">
     <value>Iluminación</value>
   </data>
+  <data name="LockScreen" xml:space="preserve">
+    <value>Pantalla de bloqueo</value>
+  </data>
   <data name="Logo" xml:space="preserve">
     <value>Logo</value>
   </data>
@@ -621,7 +624,7 @@
     <value>Optimizado</value>
   </data>
   <data name="OptimizedGPUTooltip" xml:space="preserve">
-    <value>Cambia a Eco con batería y a Estándar cuando está enchufado</value>
+    <value>Cambiar a Eco con batería y a Estándar cuando está enchufado</value>
   </data>
   <data name="OptimizedUSBC" xml:space="preserve">
     <value>Deshabilitar dGPU con cargador USB-C en modo Optimizado</value>
@@ -737,6 +740,12 @@
   <data name="ToggleScreen" xml:space="preserve">
     <value>Alternar pantalla</value>
   </data>
+  <data name="ToggleTouchscreen" xml:space="preserve">
+    <value>Alternar pantalla táctil</value>
+  </data>
+  <data name="Touchscreen" xml:space="preserve">
+    <value>Pantalla táctil</value>
+  </data>
   <data name="Turbo" xml:space="preserve">
     <value>Turbo</value>
   </data>
@@ -790,5 +799,23 @@
   </data>
   <data name="Zoom" xml:space="preserve">
     <value>Zoom</value>
+  </data>
+  <data name="Donate" xml:space="preserve">
+    <value>Donar</value>
+  </data>
+  <data name="Legend" xml:space="preserve">
+    <value>Leyenda</value>
+  </data>
+  <data name="LegendGray" xml:space="preserve">
+    <value>No se puede comprobar la versión local</value>
+    <comment>Can't check local version</comment>
+  </data>
+  <data name="LegendRed" xml:space="preserve">
+    <value>Actualización disponible</value>
+    <comment>Update Available</comment>
+  </data>
+  <data name="LegendGreen" xml:space="preserve">
+    <value>Actualizado</value>
+    <comment>Updated</comment>
   </data>
 </root>

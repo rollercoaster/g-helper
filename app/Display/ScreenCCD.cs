@@ -16,7 +16,10 @@ namespace GHelper.Display
             var modes = new DISPLAYCONFIG_MODE_INFO[modeCount];
             err = QueryDisplayConfig(QDC.QDC_ONLY_ACTIVE_PATHS, ref pathCount, paths, ref modeCount, modes, IntPtr.Zero);
             if (err != 0)
-                throw new Win32Exception(err);
+            {
+                Logger.WriteLine("HDR Detection Error: " + new Win32Exception(err).Message);
+                return false;
+            }
 
             string internalName = AppConfig.GetString("internal_display");
 
@@ -47,7 +50,7 @@ namespace GHelper.Display
                     info.monitorFriendlyDeviceName == internalName)
                 {
                     if (log) Logger.WriteLine(info.monitorFriendlyDeviceName + " HDR: " + colorInfo.advancedColorEnabled + " " + colorInfo.bitsPerColorChannel + " " + colorInfo.value + " " + colorInfo.wideColorEnforced);
-                    return colorInfo.advancedColorEnabled && colorInfo.bitsPerColorChannel > 8;
+                    return colorInfo.advancedColorEnabled && (colorInfo.bitsPerColorChannel > 8 || !colorInfo.wideColorEnforced);
                 }
 
             }

@@ -1,19 +1,30 @@
 # G-Helper - Lightweight control tool for Asus laptops
 [![United24](https://raw.githubusercontent.com/seerge/g-helper/main/docs/ua.png)](https://u24.gov.ua/)
 [![GitHub release](https://img.shields.io/github/release/seerge/g-helper)](https://GitHub.com/seerge/g-helper/releases/) 
-[![Github all releases](https://img.shields.io/github/downloads/seerge/g-helper/total)](https://GitHub.com/seerge/g-helper/releases/) [![GitHub stars](https://img.shields.io/github/stars/seerge/g-helper.svg?style=social)](https://GitHub.com/seerge/g-helper/stargazers/) <sup>[中文版点这里](https://github.com/seerge/g-helper/blob/main/docs/README.zh-CN.md)</sup>
+[![Github all releases](https://img.shields.io/github/downloads/seerge/g-helper/total)](https://GitHub.com/seerge/g-helper/releases/) [![GitHub stars](https://img.shields.io/github/stars/seerge/g-helper.svg?style=social)](https://GitHub.com/seerge/g-helper/stargazers/) <sup>[中文版点这里](https://github.com/seerge/g-helper/blob/main/docs/README.zh-CN.md)</sup> <sup>[日本語はこちら](https://github.com/seerge/g-helper/blob/main/docs/README.ja-JP.md)</sup>
 
-Small and lightweight Armoury Crate alternative for Asus laptops offering almost same functionality without extra load and unnecessary services. 
-Works with all popular models, such as ROG Zephyrus G14, G15, G16, M16, Flow X13, Flow X16, Flow Z13, TUF Series, Strix / Scar Series, ProArt, Vivobook, Zenbook, ROG Ally and many more! 
+Small and lightweight Armoury Crate alternative for Asus laptops offering almost same functionality with a much smaller footprint. Works with all popular models, such as ROG Zephyrus G14, G15, G16, M16, Flow X13, Flow X16, Flow Z13, DUO, TUF Series, Strix or Scar Series, ProArt, Vivobook, Zenbook, ROG Ally or Ally X and many more! 
 
-# [:floppy_disk:Download](https://github.com/seerge/g-helper/releases/latest/download/GHelper.zip)
+# [:floppy_disk: Download](https://github.com/seerge/g-helper/releases/latest/download/GHelper.zip)
+**⭐ If you like the app - please spread the word about it online**
+
+<table>
+<tr>
+   <td><b>Support Project</b></td>
+   <td >
+      <a href="https://bit.ly/4c0ZWs9"><img src="https://raw.githubusercontent.com/seerge/g-helper/main/docs/paypal-eur.png" height="36" alt="PayPal EUR"></a>&nbsp;
+      <a href="https://bit.ly/4aGTyW8"><img src="https://raw.githubusercontent.com/seerge/g-helper/main/docs/paypal-usd.png" height="36" alt="PayPal USD"></a>&nbsp;
+      <a href="https://buy.stripe.com/8wM6pt8HbgK50tWbIK"><img src="https://raw.githubusercontent.com/seerge/g-helper/main/docs/stripe.png" height="36" alt="Stripe"></a>&nbsp;
+      <a href="https://buy.stripe.com/6oE29dg9D3Xj7Wo28b"><img src="https://raw.githubusercontent.com/seerge/g-helper/main/docs/alipay.png" height="36" alt="Alipay"></a>
+   </td>
+</tr>
+</table>
 
 - [FAQ](https://github.com/seerge/g-helper/wiki/FAQ)
 - [Setup and Requirements](https://github.com/seerge/g-helper/wiki/Requirements)
 - [Troubleshooting](https://github.com/seerge/g-helper/wiki/Troubleshooting)
 - [Power User Settings](https://github.com/seerge/g-helper/wiki/Power-user-settings)
 
-### Support project in [:euro: EUR](https://www.paypal.com/donate/?hosted_button_id=4HMSHS4EBQWTA) or [💵 USD](https://www.paypal.com/donate/?hosted_button_id=SRM6QUX6ACXDY) 
 
 [![G-Helper Download](https://github.com/seerge/g-helper/assets/5920850/4d98465a-63a5-4498-ae14-afb3e67e7e82)](https://github.com/seerge/g-helper/releases/latest/download/GHelper.zip)
 
@@ -21,6 +32,10 @@ Works with all popular models, such as ROG Zephyrus G14, G15, G16, M16, Flow X13
 | [![Youtube review Josh Cravey](https://i.ytimg.com/vi/hqe-PjuE-K8/hqdefault.jpg)](https://www.youtube.com/watch?v=hqe-PjuE-K8) | [![Youtube review cbutters Tech](https://i.ytimg.com/vi/6aVdwJKZSSc/hqdefault.jpg)](https://www.youtube.com/watch?v=6aVdwJKZSSc) |
 | ----------------- | ---------------- | 
 | [Josh Cravey](https://www.youtube.com/watch?v=hqe-PjuE-K8) | [cbutters Tech](https://www.youtube.com/watch?v=6aVdwJKZSSc) | 
+
+## 📰 Articles
+1. https://www.digitaltrends.com/computing/g-helper-armoury-crate-alternative/
+2. https://binaryfork.com/ghelper-armoury-crate-alternative-10216/
 
 ## :gift: Advantages 
 
@@ -38,9 +53,9 @@ Works with all popular models, such as ROG Zephyrus G14, G15, G16, M16, Flow X13
 2. GPU modes: Eco - Standard - Ultimate - Optimized
 3. Screen refresh rate control with display overdrive (OD) 
 4. Custom fan curve editor, power limits and turbo boost selection for every performance mode
-5. Anime Matrix or Slash Lightning control including animated GIFs, clock and Audio visualizer
+5. Anime Matrix or Slash Lighting control including animated GIFs, clock and Audio visualizer
 6. Backlight animation modes and colors 
-7. Custom hotkeys (M-keys, FN+X keys)
+7. Hotkey handling
 8. Monitor CPU and GPU temperature, fan speeds and battery status
 9. Battery charge limit to preserve battery health
 10. NVidia GPU overclocking and undervolting
@@ -56,8 +71,6 @@ Works with all popular models, such as ROG Zephyrus G14, G15, G16, M16, Flow X13
 - Optimized GPU mode - disables dGPU on battery and enables when plugged in
 - Auto Screen refresh rate (60Hz on battery and max Hz when plugged)
 - Keyboard backlight timeout on battery or when plugged in
-
-_To keep auto switching and hotkeys working the app needs to stay running in the tray. It doesn't consume any resources._
 
 ### :rocket: Performance Modes
 
@@ -90,18 +103,25 @@ Each BIOS mode is paired with matching Windows Power Mode. You can adjust this s
 - ROG Chakram X (P708)
 - ROG Chakram Core (P511)
 - ROG Gladius II and Gladius II Origin (P502 and P504)
+- ROG Gladius II Wireless
 - ROG Gladius III
 - ROG Gladius III Wireless
 - ROG Harpe Ace Aim Lab Edition
 - ROG Keris Wireless
+- ROG Keris II Ace
 - ROG Strix Carry (P508)
 - ROG Strix III Gladius III Aimpoint Wireless (P711)
 - ROG Strix Impact III (P518)
-- ROG Spatha
+- ROG Spatha X
 - ROG Strix Impact II Wireless
+- ROG Pugio
+- ROG Pugio II
 - TUF Gaming M4 Wireless (P306)
 - TUF Gaming M3
 - TUF Gaming M3 Gen II
+- TUF Gaming M4 AIR
+- TUF Gaming M5
+- TX Gaming Mini
 
 Huge thanks to [@IceStormNG](https://github.com/IceStormNG) 👑 for contribution and research (!).
 
@@ -113,9 +133,11 @@ Huge thanks to [@IceStormNG](https://github.com/IceStormNG) 👑 for contributio
 - ``Ctrl + M1 / M2`` - Screen brightness Down / Up
 - ``Shift + M1 / M2`` - Backlight brightness Down / Up
 - ``Fn + C`` - Fn-Lock
-- ``Fn + Shift + F7 / F8`` - Matrix / Slash Lightning brightness Down / Up
+- ``Fn + Ctrl +  F7 / F8`` - Flicker-free dimming Down / Up
+- ``Fn + Shift + F7 / F8`` - Matrix / Slash Lighting brightness Down / Up
 - ``Fn + Shift + F7 / F8`` - Screenpad brightness Down / Up
 - ``Ctrl + Shift + F20`` - Mute Microphone
+- ``Ctrl + Shift + Alt + F13`` - Toggle Display Refresh Rate
 - ``Ctrl + Shift + Alt + F14`` - Eco GPU Mode
 - ``Ctrl + Shift + Alt + F15`` - Standard GPU Mode
 - ``Ctrl + Shift + Alt + F16`` - Silent
@@ -134,13 +156,6 @@ Huge thanks to [@IceStormNG](https://github.com/IceStormNG) 👑 for contributio
 - ``M + Right Stick Click`` - Controller Mode
 
 ------------------
-#### If you like the app you can make a Donation 
-
-| [Paypal in EUR](https://www.paypal.com/donate/?hosted_button_id=4HMSHS4EBQWTA) | [Paypal in USD](https://www.paypal.com/donate/?hosted_button_id=SRM6QUX6ACXDY) |
-| ------------------------------------------ | ----------------------------------------------- |
-| [![QR Code](https://user-images.githubusercontent.com/5920850/233658717-0441494d-fede-4a2c-b4f2-4b16a184a69a.png)](https://www.paypal.com/donate/?hosted_button_id=4HMSHS4EBQWTA) | [![QR Code](https://github-production-user-asset-6210df.s3.amazonaws.com/5920850/239492811-b487e89a-3df6-42ea-bdb8-24c455ab2310.png)](https://www.paypal.com/donate/?hosted_button_id=SRM6QUX6ACXDY) |
-
-------------------
 
 ### 🔖 Important Notice
 
@@ -153,13 +168,13 @@ If you use equivalent mode/settings as in Armoury Crate - the performance or the
 The role of G-Helper for your laptop is similar to the role of a remote control for your TV.
 
 ### Libraries and projects used
-- [Linux Kernel](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/asus-wmi.c) for some basic endpoints in ASUS ACPI/WMI interface
+- [Linux Kernel](https://github.com/torvalds/linux/blob/master/include/linux/platform_data/x86/asus-wmi.h) for some basic endpoints in ASUS ACPI/WMI interface
 - [NvAPIWrapper](https://github.com/falahati/NvAPIWrapper) for accessing Nvidia API
 - [Starlight](https://github.com/vddCore/Starlight) for anime matrix communication protocol
 - [UXTU](https://github.com/JamesCJ60/Universal-x86-Tuning-Utility) for undervolting using Ryzen System Management Unit
 - [AsusCtl](https://gitlab.com/asus-linux/asusctl) for inspiration and some reverse engineering
 
 ### Disclaimers
-"ROG", "TUF", and "Armoury Crate" are trademarked by and belong to AsusTek Computer, Inc. I make no claims to these or any assets belonging to AsusTek Computer and use them purely for informational purposes only.
+"Asus", "ROG", "TUF", and "Armoury Crate" are trademarked by and belong to AsusTek Computer, Inc. I make no claims to these or any assets belonging to AsusTek Computer and use them purely for informational purposes only.
 
 THE SOFTWARE IS PROVIDED “AS IS” AND WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. MISUSE OF THIS SOFTWARE COULD CAUSE SYSTEM INSTABILITY OR MALFUNCTION.

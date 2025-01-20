@@ -1,17 +1,26 @@
 ﻿using GHelper.Helpers;
 using Microsoft.Win32.TaskScheduler;
-using System.Diagnostics;
 using System.Security.Principal;
 
 public class Startup
 {
 
     static string taskName = "GHelper";
+    static string chargeTaskName = taskName + "Charge";
+    static string strExeFilePath = Application.ExecutablePath.Trim();
 
     public static bool IsScheduled()
     {
-        using (TaskService taskService = new TaskService())
-            return (taskService.RootFolder.AllTasks.Any(t => t.Name == taskName));
+        try
+        {
+            using (TaskService taskService = new TaskService())
+                return (taskService.RootFolder.AllTasks.Any(t => t.Name == taskName));
+        }
+        catch (Exception e)
+        {
+            Logger.WriteLine("Can't check startup task status: " + e.Message);
+            return false;
+        }
     }
 
     public static void ReScheduleAdmin()
@@ -30,15 +39,70 @@ public class Startup
             var task = taskService.RootFolder.AllTasks.FirstOrDefault(t => t.Name == taskName);
             if (task != null)
             {
-                string strExeFilePath = Application.ExecutablePath.Trim();
-                string action = task.Definition.Actions.FirstOrDefault()!.ToString().Trim();
-                if (!strExeFilePath.Equals(action, StringComparison.OrdinalIgnoreCase) && !File.Exists(action))
+                try
                 {
-                    Logger.WriteLine("File doesn't exist: " + action);
-                    Logger.WriteLine("Rescheduling to: " + strExeFilePath);
-                    UnSchedule();
-                    Schedule();
+                    string action = task.Definition.Actions.FirstOrDefault()!.ToString().Trim();
+                    if (!strExeFilePath.Equals(action, StringComparison.OrdinalIgnoreCase) && !File.Exists(action))
+                    {
+                        Logger.WriteLine("File doesn't exist: " + action);
+                        Logger.WriteLine("Rescheduling to: " + strExeFilePath);
+                        UnSchedule();
+                        Schedule();
+                    }
                 }
+                catch (Exception ex)
+                {
+                    Logger.WriteLine($"Can't check startup task: {ex.Message}");
+                }
+
+                if (taskService.RootFolder.AllTasks.FirstOrDefault(t => t.Name == chargeTaskName) == null) ScheduleCharge();
+
+            }
+        }
+    }
+
+    public static void UnscheduleCharge()
+    {
+        using (TaskService taskService = new TaskService())
+        {
+            try
+            {
+                taskService.RootFolder.DeleteTask(chargeTaskName);
+            }
+            catch (Exception e)
+            {
+                Logger.WriteLine("Can't remove charge limit task: " + e.Message);
+            }
+        }
+    }
+
+    public static void ScheduleCharge()
+    {
+
+        if (strExeFilePath is null) return;
+
+        using (TaskDefinition td = TaskService.Instance.NewTask())
+        {
+            td.RegistrationInfo.Description = "G-Helper Charge Limit";
+            td.Triggers.Add(new BootTrigger());
+            td.Actions.Add(strExeFilePath, "charge");
+
+            td.Principal.RunLevel = TaskRunLevel.LUA;
+            td.Principal.LogonType = TaskLogonType.S4U;
+            td.Principal.UserId = WindowsIdentity.GetCurrent().Name;
+
+            td.Settings.StopIfGoingOnBatteries = false;
+            td.Settings.DisallowStartIfOnBatteries = false;
+            td.Settings.ExecutionTimeLimit = TimeSpan.Zero;
+
+            try
+            {
+                TaskService.Instance.RootFolder.RegisterTaskDefinition(chargeTaskName, td);
+                Logger.WriteLine("Charge limit task scheduled: " + strExeFilePath);
+            }
+            catch (Exception e)
+            {
+                Logger.WriteLine("Can't create a charge limit task: " + e.Message);
             }
         }
     }
@@ -46,28 +110,19 @@ public class Startup
     public static void Schedule()
     {
 
-        string strExeFilePath = Application.ExecutablePath;
-
-        if (strExeFilePath is null) return;
-
-        var userId = WindowsIdentity.GetCurrent().Name;
-
         using (TaskDefinition td = TaskService.Instance.NewTask())
         {
 
             td.RegistrationInfo.Description = "G-Helper Auto Start";
-            td.Triggers.Add(new LogonTrigger { UserId = userId, Delay = TimeSpan.FromSeconds(1) });
+            td.Triggers.Add(new LogonTrigger { UserId = WindowsIdentity.GetCurrent().Name, Delay = TimeSpan.FromSeconds(2) });
             td.Actions.Add(strExeFilePath);
 
-            if (ProcessHelper.IsUserAdministrator()) 
+            if (ProcessHelper.IsUserAdministrator())
                 td.Principal.RunLevel = TaskRunLevel.Highest;
 
             td.Settings.StopIfGoingOnBatteries = false;
             td.Settings.DisallowStartIfOnBatteries = false;
             td.Settings.ExecutionTimeLimit = TimeSpan.Zero;
-
-            Debug.WriteLine(strExeFilePath);
-            Debug.WriteLine(userId);
 
             try
             {
@@ -80,7 +135,11 @@ public class Startup
                 else
                     ProcessHelper.RunAsAdmin();
             }
+
+            Logger.WriteLine("Startup task scheduled: " + strExeFilePath);
         }
+
+        ScheduleCharge();
 
     }
 
@@ -100,5 +159,7 @@ public class Startup
                     ProcessHelper.RunAsAdmin();
             }
         }
+
+        UnscheduleCharge();
     }
 }

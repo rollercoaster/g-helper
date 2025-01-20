@@ -506,6 +506,9 @@ Do you still want to continue?</value>
   <data name="Lighting" xml:space="preserve">
     <value>Lighting</value>
   </data>
+  <data name="LockScreen" xml:space="preserve">
+    <value>Lock Screen</value>
+  </data>
   <data name="Logo" xml:space="preserve">
     <value>Logo</value>
   </data>
@@ -621,7 +624,7 @@ Do you still want to continue?</value>
     <value>Optimized</value>
   </data>
   <data name="OptimizedGPUTooltip" xml:space="preserve">
-    <value>Switch to Eco on battery and to Standard when plugged</value>
+    <value>Switch to Eco on battery and to Standard when plugged in</value>
   </data>
   <data name="OptimizedUSBC" xml:space="preserve">
     <value>Keep GPU disabled on USB-C charger in Optimized mode</value>
@@ -737,6 +740,12 @@ Do you still want to continue?</value>
   <data name="ToggleScreen" xml:space="preserve">
     <value>Toggle Screen</value>
   </data>
+  <data name="ToggleTouchscreen" xml:space="preserve">
+    <value>Toggle Touchscreen</value>
+  </data>
+  <data name="Touchscreen" xml:space="preserve">
+    <value>Touchscreen</value>
+  </data>
   <data name="Turbo" xml:space="preserve">
     <value>Turbo</value>
   </data>
@@ -790,5 +799,23 @@ Do you still want to continue?</value>
   </data>
   <data name="Zoom" xml:space="preserve">
     <value>Zoom</value>
+  </data>
+  <data name="Donate" xml:space="preserve">
+    <value>Donate</value>
+  </data>
+  <data name="Legend" xml:space="preserve">
+    <value>Legend</value>
+  </data>
+  <data name="LegendGray" xml:space="preserve">
+    <value>Can't check local version</value>
+    <comment>Can't check local version</comment>
+  </data>
+  <data name="LegendRed" xml:space="preserve">
+    <value>Update Available</value>
+    <comment>Update Available</comment>
+  </data>
+  <data name="LegendGreen" xml:space="preserve">
+    <value>Updated</value>
+    <comment>Updated</comment>
   </data>
 </root>

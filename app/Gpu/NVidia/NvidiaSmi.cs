@@ -30,18 +30,26 @@ public static class NvidiaSmi
         return false; // Return false if the "Display Active" status is not found
     }
 
+    public static int GetDefaultMaxGPUPower()
+    {
+        if (AppConfig.ContainsModel("GU605") || AppConfig.ContainsModel("GA605")) return 125;
+        if (AppConfig.ContainsModel("GA403")) return 90;
+        if (AppConfig.ContainsModel("FA607")) return 140;
+        else return 175;
+    }
+
     public static int GetMaxGPUPower()
     {
         string output = RunNvidiaSmiCommand("--query-gpu=power.max_limit --format csv,noheader,nounits");
-        output = output.Trim().Trim('\n', '\r');
+        output = output.Trim().Trim('\n', '\r').Replace(".00","").Replace(",00", "");
 
         if (float.TryParse(output, out float floatValue))
         {
             int intValue = (int)floatValue;
-            return intValue;
+            if (intValue >= 50 && intValue <= 175) return intValue;
         }
 
-        return -1;
+        return GetDefaultMaxGPUPower();
     }
 
     private static string RunNvidiaSmiCommand(string arguments = "-i 0 -q")

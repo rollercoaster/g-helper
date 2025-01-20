@@ -506,6 +506,9 @@
   <data name="Lighting" xml:space="preserve">
     <value>Iluminare</value>
   </data>
+  <data name="LockScreen" xml:space="preserve">
+    <value>Lock Screen</value>
+  </data>
   <data name="Logo" xml:space="preserve">
     <value>Logo-ul</value>
   </data>
@@ -737,6 +740,12 @@
   <data name="ToggleScreen" xml:space="preserve">
     <value>Toggle Ecran</value>
   </data>
+  <data name="ToggleTouchscreen" xml:space="preserve">
+    <value>Toggle Touchscreen</value>
+  </data>
+  <data name="Touchscreen" xml:space="preserve">
+    <value>Touchscreen</value>
+  </data>
   <data name="Turbo" xml:space="preserve">
     <value>Turbo</value>
   </data>
@@ -790,5 +799,23 @@
   </data>
   <data name="Zoom" xml:space="preserve">
     <value>Zoom</value>
+  </data>
+  <data name="Donate" xml:space="preserve">
+    <value>Donate</value>
+  </data>
+  <data name="Legend" xml:space="preserve">
+    <value>Legend</value>
+  </data>
+  <data name="LegendGray" xml:space="preserve">
+    <value>Can't check local version</value>
+    <comment>Can't check local version</comment>
+  </data>
+  <data name="LegendRed" xml:space="preserve">
+    <value>Update Available</value>
+    <comment>Update Available</comment>
+  </data>
+  <data name="LegendGreen" xml:space="preserve">
+    <value>Updated</value>
+    <comment>Updated</comment>
   </data>
 </root>

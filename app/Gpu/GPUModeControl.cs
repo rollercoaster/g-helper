@@ -22,10 +22,14 @@ namespace GHelper.Gpu
 
         public void InitGPUMode()
         {
+            if (AppConfig.NoGpu())
+            {
+                settings.HideGPUModes(false); 
+                return;
+            }
+
             int eco = Program.acpi.DeviceGet(AsusACPI.GPUEco);
             int mux = Program.acpi.DeviceGet(AsusACPI.GPUMux);
-
-            if (mux < 0) mux = Program.acpi.DeviceGet(AsusACPI.GPUMuxVivo);
 
             Logger.WriteLine("Eco flag : " + eco);
             Logger.WriteLine("Mux flag : " + mux);
@@ -83,7 +87,6 @@ namespace GHelper.Gpu
                 if (dialogResult == DialogResult.Yes)
                 {
                     status = Program.acpi.DeviceSet(AsusACPI.GPUMux, 1, "GPUMux");
-                    if (status != 1) Program.acpi.DeviceSet(AsusACPI.GPUMuxVivo, 1, "GPUMuxVivo");
                     restart = true;
                     changed = true;
                 }
@@ -96,10 +99,17 @@ namespace GHelper.Gpu
                     if (AppConfig.NoAutoUltimate())
                     {
                         Program.acpi.SetGPUEco(0);
-                        Thread.Sleep(100);
+                        Thread.Sleep(500);
+
+                        int eco = Program.acpi.DeviceGet(AsusACPI.GPUEco);
+                        Logger.WriteLine("Eco flag : " + eco);
+                        if (eco == 1)
+                        {
+                            settings.VisualiseGPUMode();
+                            return;
+                        }
                     }
                     status = Program.acpi.DeviceSet(AsusACPI.GPUMux, 0, "GPUMux");
-                    if (status != 1) Program.acpi.DeviceSet(AsusACPI.GPUMuxVivo, 0, "GPUMuxVivo");
                     restart = true;
                     changed = true;
                 }
@@ -226,6 +236,7 @@ namespace GHelper.Gpu
                     if ((GpuAuto && !IsPlugged()) || (ForceGPU && GpuMode == AsusACPI.GPUModeEco))
                     {
 
+                        if (Program.acpi.IsXGConnected()) return false;
                         if (HardwareControl.IsUsedGPU())
                         {
                             DialogResult dialogResult = MessageBox.Show(Properties.Strings.AlertDGPU, Properties.Strings.AlertDGPUTitle, MessageBoxButtons.YesNo);
@@ -322,7 +333,6 @@ namespace GHelper.Gpu
                         Program.acpi.DeviceSet(AsusACPI.GPUXG, 1, "GPU XGM");
 
                     InitXGM();
-
                     XGM.Light(AppConfig.Is("xmg_light"));
 
                     await Task.Delay(TimeSpan.FromSeconds(15));

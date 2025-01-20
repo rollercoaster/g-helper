@@ -495,7 +495,7 @@ Nadal chcesz kontynuować?</value>
     <value>Ekran laptopa</value>
   </data>
   <data name="LEDStatusIndicators" xml:space="preserve">
-    <value>LED Status Indicators</value>
+    <value>Wskaźniki stanu</value>
   </data>
   <data name="Lid" xml:space="preserve">
     <value>Pokrywa</value>
@@ -505,6 +505,9 @@ Nadal chcesz kontynuować?</value>
   </data>
   <data name="Lighting" xml:space="preserve">
     <value>Oświetlenie</value>
+  </data>
+  <data name="LockScreen" xml:space="preserve">
+    <value>Ekran blokady</value>
   </data>
   <data name="Logo" xml:space="preserve">
     <value>Logo</value>
@@ -737,6 +740,12 @@ Nadal chcesz kontynuować?</value>
   <data name="ToggleScreen" xml:space="preserve">
     <value>Przełącz ekran</value>
   </data>
+  <data name="ToggleTouchscreen" xml:space="preserve">
+    <value>Włącz/wyłącz ekran dotykowy</value>
+  </data>
+  <data name="Touchscreen" xml:space="preserve">
+    <value>Ekran dotykowy</value>
+  </data>
   <data name="Turbo" xml:space="preserve">
     <value>Turbo</value>
   </data>
@@ -771,10 +780,10 @@ Nadal chcesz kontynuować?</value>
     <value>Tryb wyświetlania</value>
   </data>
   <data name="VisualModesHDR" xml:space="preserve">
-    <value>Visual Modes are not available when HDR is active</value>
+    <value>Tryby wyświetlania nie są dostępne, kiedy HDR jest włączone</value>
   </data>
   <data name="VisualModesScreen" xml:space="preserve">
-    <value>Visual Modes are not available when laptop screen is off</value>
+    <value>Tryby wyświetlania nie są dostępne, kiedy ekran laptopa jest wyłączony</value>
   </data>
   <data name="VolumeDown" xml:space="preserve">
     <value>Zmniejsz głośność</value>
@@ -790,5 +799,23 @@ Nadal chcesz kontynuować?</value>
   </data>
   <data name="Zoom" xml:space="preserve">
     <value>Przybliżenie</value>
+  </data>
+  <data name="Donate" xml:space="preserve">
+    <value>Wesprzyj</value>
+  </data>
+  <data name="Legend" xml:space="preserve">
+    <value>Legenda</value>
+  </data>
+  <data name="LegendGray" xml:space="preserve">
+    <value>Brak informacji</value>
+    <comment>Can't check local version</comment>
+  </data>
+  <data name="LegendRed" xml:space="preserve">
+    <value>Dostępna aktualizacja</value>
+    <comment>Update Available</comment>
+  </data>
+  <data name="LegendGreen" xml:space="preserve">
+    <value>Wersja aktualna</value>
+    <comment>Updated</comment>
   </data>
 </root>

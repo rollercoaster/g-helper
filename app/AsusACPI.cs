@@ -46,6 +46,7 @@ public class AsusACPI
 
     public const int KB_TouchpadToggle = 0x6b;
     public const int KB_MuteToggle = 0x7c;
+    public const int KB_FNlockToggle = 0x4e;
 
     public const int KB_DUO_PgUpDn = 0x4B;
     public const int KB_DUO_SecondDisplay = 0x6A;
@@ -66,12 +67,13 @@ public class AsusACPI
     public const uint PerformanceMode = 0x00120075; // Performance modes
     public const uint VivoBookMode = 0x00110019; // Vivobook performance modes
 
-    public const uint GPUEco = 0x00090020;
+    public const uint GPUEcoROG = 0x00090020;
+    public const uint GPUEcoVivo = 0x00090120;
 
     public const uint GPUXGConnected = 0x00090018;
     public const uint GPUXG = 0x00090019;
 
-    public const uint GPUMux = 0x00090016;
+    public const uint GPUMuxROG = 0x00090016;
     public const uint GPUMuxVivo = 0x00090026;
 
     public const uint BatteryLimit = 0x00120057;
@@ -79,6 +81,9 @@ public class AsusACPI
     public const uint ScreenOverdrive = 0x00050019;
     public const uint ScreenMiniled1 = 0x0005001E;
     public const uint ScreenMiniled2 = 0x0005002E;
+    public const uint ScreenFHD = 0x0005001C;
+
+    public const uint ScreenOptimalBrightness = 0x0005002A;
 
     public const uint DevsCPUFan = 0x00110022;
     public const uint DevsGPUFan = 0x00110023;
@@ -111,8 +116,11 @@ public class AsusACPI
     public const int APU_MEM = 0x000600C1;
 
     public const int TUF_KB_BRIGHTNESS = 0x00050021;
+    public const int KBD_BACKLIGHT_OOBE = 0x0005002F;
+
     public const int TUF_KB = 0x00100056;
     public const int TUF_KB2 = 0x0010005a;
+
     public const int TUF_KB_STATE = 0x00100057;
 
     public const int MicMuteLed = 0x00040017;
@@ -123,6 +131,7 @@ public class AsusACPI
     public const int ScreenPadToggle = 0x00050031;
     public const int ScreenPadBrightness = 0x00050032;
 
+    public const int CameraShutter = 0x00060078;
     public const int CameraLed = 0x00060079;
     public const int StatusLed = 0x000600C2;
 
@@ -166,6 +175,11 @@ public class AsusACPI
     public const int PCoreMax = 16;
     public const int ECoreMax = 16;
 
+    private bool? _allAMD = null;
+    private bool? _overdrive = null;
+
+    public static uint GPUEco => AppConfig.IsVivoZenPro() ? GPUEcoVivo : GPUEcoROG;
+    public static uint GPUMux => AppConfig.IsVivoZenPro() ? GPUMuxVivo : GPUMuxROG;
 
     [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
     private static extern IntPtr CreateFile(
@@ -441,14 +455,16 @@ public class AsusACPI
 
     public int SetGPUEco(int eco)
     {
-        int ecoFlag = DeviceGet(GPUEco);
+        uint ecoEndpoint = GPUEco;
+
+        int ecoFlag = DeviceGet(ecoEndpoint);
         if (ecoFlag < 0) return -1;
 
         if (ecoFlag == 1 && eco == 0)
-            return DeviceSet(GPUEco, eco, "GPUEco");
+            return DeviceSet(ecoEndpoint, eco, "GPUEco");
 
         if (ecoFlag == 0 && eco == 1)
-            return DeviceSet(GPUEco, eco, "GPUEco");
+            return DeviceSet(ecoEndpoint, eco, "GPUEco");
 
         return -1;
     }
@@ -635,8 +651,14 @@ public class AsusACPI
 
     public bool IsAllAmdPPT()
     {
-        //return false; 
-        return DeviceGet(PPT_CPUB0) >= 0 && DeviceGet(PPT_GPUC0) < 0;
+        if (_allAMD is null) _allAMD = DeviceGet(PPT_CPUB0) >= 0 && DeviceGet(PPT_GPUC0) < 0 && !AppConfig.IsAlly();
+        return (bool)_allAMD;
+    }
+
+    public bool IsOverdriveSupported()
+    {
+        if (_overdrive is null) _overdrive = DeviceGet(ScreenOverdrive) >= 0;
+        return (bool)_overdrive;
     }
 
     public bool IsNVidiaGPU()
@@ -769,6 +791,7 @@ public class AsusACPI
     {
         int param = 0x80 | (brightness & 0x7F);
         DeviceSet(TUF_KB_BRIGHTNESS, param, "TUF Brightness");
+
     }
 
     public void TUFKeyboardRGB(AuraMode mode, Color color, int speed, string? log = "TUF RGB")
@@ -784,7 +807,13 @@ public class AsusACPI
         setting[5] = (byte)speed;
 
         int result = DeviceSet(TUF_KB, setting, log);
-        if (result != 1) DeviceSet(TUF_KB2, setting, log);
+        if (result != 1)
+        {
+            setting[0] = (byte)0xb3;
+            DeviceSet(TUF_KB2, setting, log);
+            setting[0] = (byte)0xb4;
+            DeviceSet(TUF_KB2, setting, log);
+        }
 
     }
 
@@ -804,6 +833,7 @@ public class AsusACPI
         state = state | 0x01 << 8;
 
         DeviceSet(TUF_KB_STATE, state, "TUF_KB");
+        if (AppConfig.IsVivoZenPro() && DeviceGet(KBD_BACKLIGHT_OOBE) >= 0) DeviceSet(KBD_BACKLIGHT_OOBE, 1, "VIVO OOBE");
     }
 
     public void SubscribeToEvents(Action<object, EventArrivedEventArgs> EventHandler)

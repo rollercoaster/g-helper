@@ -7,15 +7,16 @@ namespace GHelper.USB
 {
     public static class XGM
     {
-        const int XGM_ID = 0x1970;
         const int ASUS_ID = 0x0b05;
+
+        static int[] deviceIds = { 0x1970, 0x1a9a};
 
         public static void Write(byte[] data)
         {
             HidDeviceLoader loader = new HidDeviceLoader();
             try
             {
-                HidDevice device = loader.GetDevices(ASUS_ID, XGM_ID).Where(device => device.CanOpen && device.GetMaxFeatureReportLength() >= 300).FirstOrDefault();
+                HidDevice device = loader.GetDevices(ASUS_ID).Where(device => deviceIds.Contains(device.ProductID) && device.CanOpen && device.GetMaxFeatureReportLength() >= 300).FirstOrDefault();
 
                 if (device is null)
                 {
@@ -51,6 +52,10 @@ namespace GHelper.USB
             Write(new byte[] { 0x5e, 0xc5, status ? (byte)0x50 : (byte)0 });
         }
 
+        public static void InitLight()
+        {
+            if (Program.acpi.IsXGConnected()) Light(AppConfig.Is("xmg_light"));
+        }
 
         public static void Reset()
         {

@@ -188,17 +188,22 @@ namespace GHelper.Peripherals
             DetectMouse(new GladiusIIIAimpoint());
             DetectMouse(new GladiusIIIAimpointWired());
             DetectMouse(new GladiusIIOrigin());
+            DetectMouse(new GladiusIIOriginPink());
             DetectMouse(new GladiusII());
+            DetectMouse(new GladiusIIWireless());
             DetectMouse(new ROGKerisWireless());
             DetectMouse(new ROGKerisWirelessWired());
+            DetectMouse(new ROGKeris());
             DetectMouse(new ROGKerisWirelessEvaEdition());
             DetectMouse(new ROGKerisWirelessEvaEditionWired());
+            DetectMouse(new TUFM4Air());
             DetectMouse(new TUFM4Wirelss());
             DetectMouse(new TUFM4WirelssCN());
             DetectMouse(new StrixImpactIIWireless());
             DetectMouse(new StrixImpactIIWirelessWired());
-            DetectMouse(new GladiusIII());
+            DetectMouse(new GladiusIIIWireless());
             DetectMouse(new GladiusIIIWired());
+            DetectMouse(new GladiusIII());
             DetectMouse(new GladiusIIIAimpointEva2());
             DetectMouse(new GladiusIIIAimpointEva2Wired());
             DetectMouse(new HarpeAceAimLabEdition());
@@ -209,6 +214,7 @@ namespace GHelper.Peripherals
             DetectMouse(new TUFM5());
             DetectMouse(new KerisWirelssAimpoint());
             DetectMouse(new KerisWirelssAimpointWired());
+            DetectMouse(new KerisIIAceWired());
             DetectMouse(new PugioII());
             DetectMouse(new PugioIIWired());
             DetectMouse(new StrixImpactII());
@@ -220,6 +226,9 @@ namespace GHelper.Peripherals
             DetectMouse(new StrixCarry());
             DetectMouse(new StrixImpactIII());
             DetectMouse(new StrixImpact());
+            DetectMouse(new TXGamingMini());
+            DetectMouse(new TXGamingMiniWired());
+            DetectMouse(new Pugio());
         }
 
         public static void DetectMouse(AsusMouse am)

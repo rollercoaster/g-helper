@@ -30,6 +30,7 @@ namespace GHelper
             labelScaling.Text = Properties.Strings.ScalingQuality;
             labelRotation.Text = Properties.Strings.ImageRotation;
             labelContrastTitle.Text = Properties.Strings.Contrast;
+            labelGammaTitle.Text = Properties.Strings.Brightness;
             buttonPicture.Text = Properties.Strings.PictureGif;
             buttonReset.Text = Properties.Strings.Reset;
 
@@ -47,9 +48,13 @@ namespace GHelper
             trackZoom.ValueChanged += TrackZoom_Changed;
             trackZoom.Value = Math.Min(trackZoom.Maximum, AppConfig.Get("matrix_zoom", 100));
 
-            trackContrast.MouseUp += TrackContrast_MouseUp; ;
-            trackContrast.ValueChanged += TrackContrast_ValueChanged; ;
+            trackContrast.MouseUp += TrackMatrix_MouseUp;
+            trackContrast.ValueChanged += TrackMatrix_ValueChanged;
             trackContrast.Value = Math.Min(trackContrast.Maximum, AppConfig.Get("matrix_contrast", 100));
+
+            trackGamma.MouseUp += TrackMatrix_MouseUp;
+            trackGamma.ValueChanged += TrackMatrix_ValueChanged;
+            trackGamma.Value = Math.Min(trackGamma.Maximum, AppConfig.Get("matrix_gamma", 0));
 
             VisualiseMatrix();
 
@@ -67,16 +72,18 @@ namespace GHelper
 
         }
 
-        private void TrackContrast_ValueChanged(object? sender, EventArgs e)
+        private void TrackMatrix_ValueChanged(object? sender, EventArgs e)
         {
             VisualiseMatrix();
         }
 
-        private void TrackContrast_MouseUp(object? sender, MouseEventArgs e)
+        private void TrackMatrix_MouseUp(object? sender, MouseEventArgs e)
         {
             AppConfig.Set("matrix_contrast", trackContrast.Value);
-            SetMatrixPicture();
+            AppConfig.Set("matrix_gamma", trackGamma.Value);
+            SetMatrixPicture(false);
         }
+
 
         private void ComboRotation_SelectedValueChanged(object? sender, EventArgs e)
         {
@@ -104,10 +111,12 @@ namespace GHelper
         {
             labelZoom.Text = trackZoom.Value + "%";
             labelContrast.Text = trackContrast.Value + "%";
+            labelGamma.Text = trackGamma.Value + "%";
         }
 
         private void ButtonReset_Click(object? sender, EventArgs e)
         {
+            AppConfig.Set("matrix_gamma", 0);
             AppConfig.Set("matrix_contrast", 100);
             AppConfig.Set("matrix_zoom", 100);
             AppConfig.Set("matrix_x", 0);
@@ -115,6 +124,7 @@ namespace GHelper
 
             trackZoom.Value = 100;
             trackContrast.Value = 100;
+            trackGamma.Value = 0;
 
             SetMatrixPicture();
 

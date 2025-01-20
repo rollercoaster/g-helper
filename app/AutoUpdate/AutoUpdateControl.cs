@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Reflection;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace GHelper.AutoUpdate
 {
@@ -36,7 +37,14 @@ namespace GHelper.AutoUpdate
 
         public void LoadReleases()
         {
-            Process.Start(new ProcessStartInfo(versionUrl) { UseShellExecute = true });
+            try
+            {
+                Process.Start(new ProcessStartInfo(versionUrl) { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteLine("Failed to open releases page:" + ex.Message);
+            }
         }
 
         async void CheckForUpdatesAsync()
@@ -75,6 +83,13 @@ namespace GHelper.AutoUpdate
                         versionUrl = url;
                         settings.SetVersionLabel(Properties.Strings.DownloadUpdate + ": " + tag, true);
 
+                        string[] args = Environment.GetCommandLineArgs();
+                        if (args.Length > 1 && args[1] == "autoupdate")
+                        {
+                            AutoUpdate(url);
+                            return;
+                        }
+
                         if (AppConfig.GetString("skip_version") != tag)
                         {
                             DialogResult dialogResult = MessageBox.Show(Properties.Strings.DownloadUpdate + ": G-Helper " + tag + "?", "Update", MessageBoxButtons.YesNo);
@@ -99,6 +114,10 @@ namespace GHelper.AutoUpdate
 
         }
 
+        public static string EscapeString(string input)
+        {
+            return Regex.Replace(Regex.Replace(input, @"\[|\]", "`$0"), @"\'", "''");
+        }
 
         async void AutoUpdate(string requestUri)
         {
@@ -108,19 +127,28 @@ namespace GHelper.AutoUpdate
 
             string exeLocation = Application.ExecutablePath;
             string exeDir = Path.GetDirectoryName(exeLocation);
+            //exeDir = "C:\\Program Files\\GHelper";
             string exeName = Path.GetFileName(exeLocation);
             string zipLocation = exeDir + "\\" + zipName;
 
             using (WebClient client = new WebClient())
             {
-                client.DownloadFile(uri, zipLocation);
+                try
+                {
+                    client.DownloadFile(uri, zipLocation);
+                }
+                catch (Exception ex)
+                {
+                    Logger.WriteLine(ex.Message);
+                    ProcessHelper.RunAsAdmin("autoupdate");
+                }
 
                 Logger.WriteLine(requestUri);
                 Logger.WriteLine(exeDir);
                 Logger.WriteLine(zipName);
                 Logger.WriteLine(exeName);
 
-                string command = $"$ErrorActionPreference = \"Stop\"; Wait-Process -Name \"GHelper\"; Expand-Archive \"{zipName}\" -DestinationPath . -Force; Remove-Item \"{zipName}\" -Force; \".\\{exeName}\"; "; 
+                string command = $"$ErrorActionPreference = \"Stop\"; Set-Location -Path '{EscapeString(exeDir)}'; Wait-Process -Name \"GHelper\"; Expand-Archive \"{zipName}\" -DestinationPath . -Force; Remove-Item \"{zipName}\" -Force; \".\\{exeName}\"; ";
                 Logger.WriteLine(command);
 
                 try
@@ -139,7 +167,7 @@ namespace GHelper.AutoUpdate
                     Logger.WriteLine(ex.Message);
                 }
 
-                Environment.Exit(0);
+                Application.Exit();
             }
 
         }

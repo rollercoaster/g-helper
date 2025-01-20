@@ -21,6 +21,7 @@ namespace Ryzen
 
         public static int MinTemp => AppConfig.Get("min_temp", 75);
         public const int MaxTemp = 98;
+        public const int DefaultTemp = 96;
 
         public static int FAMID { get; protected set; }
 
@@ -41,6 +42,7 @@ namespace Ryzen
         //RAPHAEL/DRAGON RANGE - 10
         //MENDOCINO - 11
         //HAWKPOINT - 12
+        //STRIXPOINT - 13
 
         public static void Init()
         {
@@ -77,7 +79,7 @@ namespace Ryzen
                 FAMID = 1; //PICASSO
             }
 
-            if (CPUModel.Contains("Model " + Convert.ToString(32)))
+            if (CPUModel.Contains("Family " + Convert.ToString(23)) && CPUModel.Contains("Model " + Convert.ToString(32)))
             {
                 FAMID = 2; //DALI
             }
@@ -127,6 +129,11 @@ namespace Ryzen
                 FAMID = 12; //HAWKPOINT 
             }
 
+            if (CPUModel.Contains("Family " + Convert.ToString(26)) && CPUModel.Contains("Model " + Convert.ToString(36)))
+            {
+                FAMID = 13; //STRIXPOINT 
+            }
+
             Logger.WriteLine($"CPU: {FAMID} - {CPUName} - {CPUModel}");
 
             SetAddresses();
@@ -141,7 +148,7 @@ namespace Ryzen
         public static bool IsSupportedUV()
         {
             if (CPUName.Length == 0) Init();
-            return CPUName.Contains("Ryzen 9") || CPUName.Contains("4900H") || CPUName.Contains("4800H") || CPUName.Contains("4600H");
+            return CPUName.Contains("Ryzen AI 9") || CPUName.Contains("Ryzen 9") || CPUName.Contains("4900H") || CPUName.Contains("4800H") || CPUName.Contains("4600H");
         }
 
         public static bool IsSupportedUViGPU()
@@ -232,6 +239,16 @@ namespace Ryzen
             {
                 Smu.MP1_ADDR_MSG = 0x3B10528;
                 Smu.MP1_ADDR_RSP = 0x3B10578;
+                Smu.MP1_ADDR_ARG = 0x3B10998;
+
+                Smu.PSMU_ADDR_MSG = 0x3B10a20;
+                Smu.PSMU_ADDR_RSP = 0x3B10a80;
+                Smu.PSMU_ADDR_ARG = 0x3B10a88;
+            }
+            else if (FAMID == 13)
+            {
+                Smu.MP1_ADDR_MSG = 0x3B10928;
+                Smu.MP1_ADDR_RSP = 0x3B10978;
                 Smu.MP1_ADDR_ARG = 0x3B10998;
 
                 Smu.PSMU_ADDR_MSG = 0x3B10a20;

@@ -159,6 +159,34 @@
         }
     }
 
+    //P509
+    public class ROGKeris : ROGKerisWireless
+    {
+        public ROGKeris() : base(0x195C, false)
+        {
+        }
+
+        public override string GetDisplayName()
+        {
+            return "ROG Keris";
+        }
+
+        public override bool HasBattery()
+        {
+            return false;
+        }
+
+        public override bool HasLowBatteryWarning()
+        {
+            return false;
+        }
+
+        public override bool HasAutoPowerOff()
+        {
+            return false;
+        }
+    }
+
     public class ROGKerisWirelessWired : ROGKerisWireless
     {
         public ROGKerisWirelessWired() : base(0x195E, false)

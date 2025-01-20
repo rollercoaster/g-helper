@@ -326,7 +326,8 @@ namespace GHelper
                 return;
             }
 
-            LightingMode lm = supportedLightingModes[comboBoxLightingMode.SelectedIndex];
+            var index = comboBoxLightingMode.SelectedIndex;
+            LightingMode lm = supportedLightingModes[index < supportedLightingModes.Count ? index : 0 ];
 
             LightingSetting? ls = mouse.LightingSettingForZone(visibleZone);
             if (ls.LightingMode == lm)
@@ -866,14 +867,23 @@ namespace GHelper
 
         private void VisualizeCurrentDPIProfile()
         {
-            if (mouse.DpiProfile > mouse.DpiSettings.Count())
+            if (mouse.DpiProfile > mouse.DpiSettings.Length)
             {
                 Logger.WriteLine($"Wrong mouse DPI: {mouse.DpiProfile}");
                 return;
             }
 
-            AsusMouseDPI dpi = mouse.DpiSettings[mouse.DpiProfile - 1];
-            
+            AsusMouseDPI dpi;
+
+            try
+            {
+                dpi = mouse.DpiSettings[mouse.DpiProfile - 1];
+            } catch (Exception ex)
+            {
+                Logger.WriteLine($"Wrong mouse DPI: {mouse.DpiProfile} {mouse.DpiSettings.Length} {ex.Message}");
+                return;
+            }
+
             if (dpi is null)
             {
                 return;

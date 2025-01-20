@@ -24,7 +24,7 @@ namespace GHelper
 
         public GPUModeControl gpuControl;
         public AllyControl allyControl;
-        ScreenControl screenControl = new ScreenControl(); 
+        ScreenControl screenControl = new ScreenControl();
         AutoUpdateControl updateControl;
 
         AsusMouseSettings? mouseSettings;
@@ -93,6 +93,7 @@ namespace GHelper
             buttonMatrix.Text = Properties.Strings.PictureGif;
             buttonQuit.Text = Properties.Strings.Quit;
             buttonUpdates.Text = Properties.Strings.Updates;
+            buttonDonate.Text = Properties.Strings.Donate;
 
             buttonController.Text = Properties.Strings.Controller;
             labelAlly.Text = Properties.Strings.AllyController;
@@ -138,9 +139,9 @@ namespace GHelper
             buttonOptimized.BorderColor = colorEco;
             buttonXGM.BorderColor = colorTurbo;
 
-            button60Hz.BorderColor = SystemColors.ActiveBorder;
-            button120Hz.BorderColor = SystemColors.ActiveBorder;
-            buttonScreenAuto.BorderColor = SystemColors.ActiveBorder;
+            button60Hz.BorderColor = colorGray;
+            button120Hz.BorderColor = colorGray;
+            buttonScreenAuto.BorderColor = colorGray;
             buttonMiniled.BorderColor = colorTurbo;
 
             buttonSilent.Click += ButtonSilent_Click;
@@ -159,6 +160,7 @@ namespace GHelper
             button120Hz.Click += Button120Hz_Click;
             buttonScreenAuto.Click += ButtonScreenAuto_Click;
             buttonMiniled.Click += ButtonMiniled_Click;
+            buttonFHD.Click += ButtonFHD_Click;
 
             buttonQuit.Click += ButtonQuit_Click;
 
@@ -216,9 +218,15 @@ namespace GHelper
             button120Hz.MouseMove += Button120Hz_MouseHover;
             button120Hz.MouseLeave += ButtonScreen_MouseLeave;
 
+            buttonFHD.MouseMove += ButtonFHD_MouseHover;
+            buttonFHD.MouseLeave += ButtonScreen_MouseLeave;
+
             buttonUpdates.Click += ButtonUpdates_Click;
 
+            sliderBattery.MouseUp += SliderBattery_MouseUp;
+            sliderBattery.KeyUp += SliderBattery_KeyUp;
             sliderBattery.ValueChanged += SliderBattery_ValueChanged;
+
             Program.trayIcon.MouseMove += TrayIcon_MouseMove;
 
             sensorTimer = new System.Timers.Timer(AppConfig.Get("sensor_timer", 1000));
@@ -227,6 +235,7 @@ namespace GHelper
 
             labelCharge.MouseEnter += PanelBattery_MouseEnter;
             labelCharge.MouseLeave += PanelBattery_MouseLeave;
+            labelBattery.Click += LabelBattery_Click;
 
             buttonPeripheral1.Click += ButtonPeripheral_Click;
             buttonPeripheral2.Click += ButtonPeripheral_Click;
@@ -246,6 +255,9 @@ namespace GHelper
             buttonFPS.Click += ButtonFPS_Click;
             buttonOverlay.Click += ButtonOverlay_Click;
 
+            buttonAutoTDP.Click += ButtonAutoTDP_Click;
+            buttonAutoTDP.BorderColor = colorTurbo;
+
             Text = "G-Helper " + (ProcessHelper.IsUserAdministrator() ? "—" : "-") + " " + AppConfig.GetModelShort();
             TopMost = AppConfig.Is("topmost");
 
@@ -259,14 +271,67 @@ namespace GHelper
             labelVisual.Click += LabelVisual_Click;
             labelCharge.Click += LabelCharge_Click;
 
+            buttonDonate.Click += ButtonDonate_Click;
+
+            int click = AppConfig.Get("donate_click");
+            if (AppConfig.Get("start_count") >= ((click < 10) ? 10 : click + 50))
+            {
+                buttonDonate.BorderColor = colorTurbo;
+                buttonDonate.Badge = true;
+            }
+
+            labelDynamicLighting.Click += LabelDynamicLighting_Click;
+
             panelPerformance.Focus();
             InitVisual();
         }
 
+        private void LabelBattery_Click(object? sender, EventArgs e)
+        {
+            HardwareControl.chargeWatt = !HardwareControl.chargeWatt;
+            RefreshSensors(true);
+        }
+
+        private void ButtonDonate_Click(object? sender, EventArgs e)
+        {
+            AppConfig.Set("donate_click", AppConfig.Get("start_count"));
+            buttonDonate.Badge = false;
+            Process.Start(new ProcessStartInfo("https://g-helper.com/support") { UseShellExecute = true });
+        }
+
+        private void LabelDynamicLighting_Click(object? sender, EventArgs e)
+        {
+            DynamicLightingHelper.OpenSettings();
+        }
+
+        private void ButtonFHD_Click(object? sender, EventArgs e)
+        {
+            screenControl.ToogleFHD();
+        }
+
+        private void SliderBattery_ValueChanged(object? sender, EventArgs e)
+        {
+            VisualiseBatteryTitle(sliderBattery.Value);
+        }
+
+        private void SliderBattery_KeyUp(object? sender, KeyEventArgs e)
+        {
+            BatteryControl.SetBatteryChargeLimit(sliderBattery.Value);
+        }
+
+        private void SliderBattery_MouseUp(object? sender, MouseEventArgs e)
+        {
+            BatteryControl.SetBatteryChargeLimit(sliderBattery.Value);
+        }
+
+        private void ButtonAutoTDP_Click(object? sender, EventArgs e)
+        {
+            allyControl.ToggleAutoTDP();
+        }
+
         private void LabelCharge_Click(object? sender, EventArgs e)
         {
-            ProcessHelper.RunCMD("powershell", "powercfg /batteryreport");
-            ProcessHelper.RunCMD("explorer", "battery-report.html");
+            BatteryControl.BatteryReport();
         }
 
         private void LabelVisual_Click(object? sender, EventArgs e)
@@ -291,7 +356,8 @@ namespace GHelper
                 sliderGamma.ValueChanged += SliderGamma_ValueChanged;
                 sliderGamma.MouseUp += SliderGamma_ValueChanged;
 
-            } else
+            }
+            else
             {
                 labelGammaTitle.Text = Properties.Strings.VisualMode;
             }
@@ -303,7 +369,8 @@ namespace GHelper
             {
                 tableVisual.ColumnCount = 3;
                 buttonInstallColor.Visible = false;
-            } else
+            }
+            else
             {
                 // If it's possible to retrieve color profiles
                 if (ColorProfileHelper.ProfileExists())
@@ -324,7 +391,7 @@ namespace GHelper
             panelGamma.Visible = true;
             tableVisual.Visible = true;
 
-            var visualValue = (SplendidCommand)AppConfig.Get("visual", (int)SplendidCommand.Default);
+            var visualValue = (SplendidCommand)AppConfig.Get("visual", (int)VisualControl.GetDefaultVisualMode());
             var colorTempValue = AppConfig.Get("color_temp", VisualControl.DefaultColorTemp);
 
             comboVisual.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -343,6 +410,7 @@ namespace GHelper
 
             comboVisual.SelectedValueChanged += ComboVisual_SelectedValueChanged;
             comboVisual.Visible = true;
+            VisualiseDisabled();
 
             comboColorTemp.SelectedValueChanged += ComboVisual_SelectedValueChanged;
             comboColorTemp.Visible = true;
@@ -353,7 +421,7 @@ namespace GHelper
             comboGamut.DataSource = new BindingSource(gamuts, null);
             comboGamut.DisplayMember = "Value";
             comboGamut.ValueMember = "Key";
-            comboGamut.SelectedValue = (SplendidGamut)AppConfig.Get("gamut", (int)SplendidGamut.Native);
+            comboGamut.SelectedValue = (SplendidGamut)AppConfig.Get("gamut", (int)VisualControl.GetDefaultGamut());
 
             comboGamut.SelectedValueChanged += ComboGamut_SelectedValueChanged;
             comboGamut.Visible = true;
@@ -363,7 +431,7 @@ namespace GHelper
         public void CycleVisualMode()
         {
 
-            if (comboVisual.Items.Count < 1) return ;
+            if (comboVisual.Items.Count < 1) return;
 
             if (comboVisual.SelectedIndex < comboVisual.Items.Count - 1)
                 comboVisual.SelectedIndex += 1;
@@ -381,15 +449,13 @@ namespace GHelper
 
         private void ComboGamut_SelectedValueChanged(object? sender, EventArgs e)
         {
-            AppConfig.Set("gamut", (int)comboGamut.SelectedValue);
             VisualControl.SetGamut((int)comboGamut.SelectedValue);
         }
 
         private void ComboVisual_SelectedValueChanged(object? sender, EventArgs e)
         {
-            AppConfig.Set("visual", (int)comboVisual.SelectedValue);
-            AppConfig.Set("color_temp", (int)comboColorTemp.SelectedValue);
             VisualControl.SetVisual((SplendidCommand)comboVisual.SelectedValue, (int)comboColorTemp.SelectedValue);
+            VisualiseDisabled();
         }
 
         public void VisualiseBrightness()
@@ -397,9 +463,22 @@ namespace GHelper
             Invoke(delegate
             {
                 sliderGammaIgnore = true;
-                sliderGamma.Value = AppConfig.Get("brightness", 100);
+                sliderGamma.Value = VisualControl.GetBrightness();
                 labelGamma.Text = sliderGamma.Value + "%";
                 sliderGammaIgnore = false;
+            });
+        }
+
+        public void VisualiseDisabled()
+        {
+            comboGamut.Enabled = comboColorTemp.Enabled = (SplendidCommand)AppConfig.Get("visual") != SplendidCommand.Disabled;
+        }
+
+        public void VisualiseGamut()
+        {
+            Invoke(delegate
+            {
+                if (comboGamut.Items.Count > 0) comboGamut.SelectedIndex = 0;
             });
         }
 
@@ -486,6 +565,12 @@ namespace GHelper
         public void VisualiseFPSLimit(int limit)
         {
             buttonFPS.Text = "FPS Limit " + ((limit > 0 && limit <= 120) ? limit : "OFF");
+        }
+
+        public void VisualiseAutoTDP(bool status)
+        {
+            Logger.WriteLine($"Auto TDP: {status}");
+            buttonAutoTDP.Activated = status;
         }
 
         private void SettingsForm_LostFocus(object? sender, EventArgs e)
@@ -597,14 +682,14 @@ namespace GHelper
                     {
                         case 0:
                             Logger.WriteLine("Lid Closed");
+                            InputDispatcher.lidClose = AniMatrixControl.lidClose = true;
                             Aura.ApplyBrightness(0, "Lid");
-                            AniMatrixControl.lidClose = true;
                             matrixControl.SetLidMode();
                             break;
                         case 1:
                             Logger.WriteLine("Lid Open");
+                            InputDispatcher.lidClose = AniMatrixControl.lidClose = false;
                             Aura.ApplyBrightness(InputDispatcher.GetBacklight(), "Lid");
-                            AniMatrixControl.lidClose = false;
                             matrixControl.SetLidMode();
                             break;
                     }
@@ -620,7 +705,7 @@ namespace GHelper
                             break;
                         case 1:
                             Logger.WriteLine("Monitor Power On");
-                            Program.SetAutoModes();
+                            if (!Program.SetAutoModes()) BatteryControl.AutoBattery();
                             break;
                         case 2:
                             Logger.WriteLine("Monitor Dimmed");
@@ -728,11 +813,6 @@ namespace GHelper
             gpuControl.ToggleXGM();
         }
 
-        private void SliderBattery_ValueChanged(object? sender, EventArgs e)
-        {
-            BatteryControl.SetBatteryChargeLimit(sliderBattery.Value);
-        }
-
 
         public void SetVersionLabel(string label, bool update = false)
         {
@@ -766,6 +846,11 @@ namespace GHelper
             Program.settingsForm.RefreshSensors();
         }
 
+        private void ButtonFHD_MouseHover(object? sender, EventArgs e)
+        {
+            labelTipScreen.Text = "Switch to " + ((buttonFHD.Text == "FHD") ? "UHD" : "FHD") + " Mode";
+        }
+
         private void Button120Hz_MouseHover(object? sender, EventArgs e)
         {
             labelTipScreen.Text = Properties.Strings.MaxRefreshTooltip;
@@ -773,7 +858,7 @@ namespace GHelper
 
         private void Button60Hz_MouseHover(object? sender, EventArgs e)
         {
-            labelTipScreen.Text = Properties.Strings.MinRefreshTooltip;
+            labelTipScreen.Text = Properties.Strings.MinRefreshTooltip.Replace("60", ScreenControl.MIN_RATE.ToString());
         }
 
         private void ButtonScreen_MouseLeave(object? sender, EventArgs e)
@@ -783,7 +868,7 @@ namespace GHelper
 
         private void ButtonScreenAuto_MouseHover(object? sender, EventArgs e)
         {
-            labelTipScreen.Text = Properties.Strings.AutoRefreshTooltip;
+            labelTipScreen.Text = Properties.Strings.AutoRefreshTooltip.Replace("60", ScreenControl.MIN_RATE.ToString());
         }
 
         private void ButtonUltimate_MouseHover(object? sender, EventArgs e)
@@ -1040,21 +1125,26 @@ namespace GHelper
             });
         }
 
+        private void _VisualiseAura()
+        {
+            pictureColor.BackColor = Aura.Color1;
+            pictureColor2.BackColor = Aura.Color2;
+            pictureColor2.Visible = Aura.HasSecondColor();
+
+            if (AppConfig.IsDynamicLighting())
+            {
+                labelDynamicLighting.Visible = DynamicLightingHelper.IsEnabled();
+                labelDynamicLighting.ForeColor = colorStandard;
+                this.OnResize(null);
+            }
+        }
+
         public void VisualiseAura()
         {
             if (InvokeRequired)
-                Invoke(delegate
-                {
-                    pictureColor.BackColor = Aura.Color1;
-                    pictureColor2.BackColor = Aura.Color2;
-                    pictureColor2.Visible = Aura.HasSecondColor();
-                });
+                Invoke(_VisualiseAura);
             else
-            {
-                pictureColor.BackColor = Aura.Color1;
-                pictureColor2.BackColor = Aura.Color2;
-                pictureColor2.Visible = Aura.HasSecondColor();
-            }
+                _VisualiseAura();
         }
 
         public void InitMatrix()
@@ -1068,7 +1158,7 @@ namespace GHelper
 
             if (matrixControl.IsSlash)
             {
-                labelMatrix.Text = "Slash Lightning";
+                labelMatrix.Text = "Slash Lighting";
                 comboMatrixRunning.Items.Clear();
 
                 foreach (var item in SlashDevice.Modes)
@@ -1084,7 +1174,7 @@ namespace GHelper
                 checkMatrixLid.Visible = true;
             }
 
-            comboMatrix.SelectedIndex = Math.Min(AppConfig.Get("matrix_brightness", 0), comboMatrix.Items.Count - 1);
+            comboMatrix.SelectedIndex = Math.Max(0, Math.Min(AppConfig.Get("matrix_brightness", 0), comboMatrix.Items.Count - 1));
             comboMatrixRunning.SelectedIndex = Math.Min(AppConfig.Get("matrix_running", 0), comboMatrixRunning.Items.Count - 1);
             comboInterval.SelectedIndex = Math.Min(AppConfig.Get("matrix_interval", 0), comboInterval.Items.Count - 1);
 
@@ -1133,7 +1223,7 @@ namespace GHelper
         private void Button60Hz_Click(object? sender, EventArgs e)
         {
             AppConfig.Set("screen_auto", 0);
-            screenControl.SetScreen(60, 0);
+            screenControl.SetScreen(ScreenControl.MIN_RATE, 0);
         }
 
 
@@ -1144,7 +1234,7 @@ namespace GHelper
 
 
 
-        public void VisualiseScreen(bool screenEnabled, bool screenAuto, int frequency, int maxFrequency, int overdrive, bool overdriveSetting, int miniled1, int miniled2, bool hdr)
+        public void VisualiseScreen(bool screenEnabled, bool screenAuto, int frequency, int maxFrequency, int overdrive, bool overdriveSetting, int miniled1, int miniled2, bool hdr, int fhd)
         {
 
             ButtonEnabled(button60Hz, screenEnabled);
@@ -1164,16 +1254,18 @@ namespace GHelper
             {
                 buttonScreenAuto.Activated = true;
             }
-            else if (frequency == 60)
+            else if (frequency == ScreenControl.MIN_RATE)
             {
                 button60Hz.Activated = true;
             }
-            else if (frequency > 60)
+            else if (frequency > ScreenControl.MIN_RATE)
             {
                 button120Hz.Activated = true;
             }
 
-            if (maxFrequency > 60)
+            button60Hz.Text = ScreenControl.MIN_RATE + "Hz";
+
+            if (maxFrequency > ScreenControl.MIN_RATE)
             {
                 button120Hz.Text = maxFrequency.ToString() + "Hz" + (overdriveSetting ? " + OD" : "");
                 panelScreen.Visible = true;
@@ -1181,6 +1273,12 @@ namespace GHelper
             else if (maxFrequency > 0)
             {
                 panelScreen.Visible = false;
+            }
+
+            if (fhd >= 0)
+            {
+                buttonFHD.Visible = true;
+                buttonFHD.Text = fhd > 0 ? "FHD" : "UHD";
             }
 
             if (miniled1 >= 0)
@@ -1191,6 +1289,7 @@ namespace GHelper
             else if (miniled2 >= 0)
             {
                 buttonMiniled.Enabled = !hdr;
+                if (hdr) miniled2 = 1; // Show HDR as Multizone Strong
 
                 switch (miniled2)
                 {
@@ -1208,9 +1307,9 @@ namespace GHelper
                         break;
                     // Multizone Off
                     case 2:
-                        buttonMiniled.Text = hdr ? Properties.Strings.Multizone : Properties.Strings.OneZone;
+                        buttonMiniled.Text = Properties.Strings.OneZone;
                         buttonMiniled.BorderColor = colorStandard;
-                        buttonMiniled.Activated = hdr;
+                        buttonMiniled.Activated = false;
                         break;
                 }
             }
@@ -1228,7 +1327,8 @@ namespace GHelper
                 labelVisual.Width = tableVisual.Width;
                 labelVisual.Height = tableVisual.Height;
                 labelVisual.Visible = true;
-            } else
+            }
+            else
             {
                 labelVisual.Visible = false;
             }
@@ -1255,6 +1355,8 @@ namespace GHelper
             if (updatesForm != null && updatesForm.Text != "") updatesForm.Close();
             if (matrixForm != null && matrixForm.Text != "") matrixForm.Close();
             if (handheldForm != null && handheldForm.Text != "") handheldForm.Close();
+            if (mouseSettings != null && mouseSettings.Text != "") mouseSettings.Close();
+
         }
 
         /// <summary>
@@ -1335,7 +1437,9 @@ namespace GHelper
                 cpuTemp = ": " + Math.Round((decimal)HardwareControl.cpuTemp).ToString() + "°C";
 
             if (HardwareControl.batteryCapacity > 0)
-                charge = Properties.Strings.BatteryCharge + ": " + Math.Round(HardwareControl.batteryCapacity, 1) + "% ";
+            {
+                charge = Properties.Strings.BatteryCharge + ": " + HardwareControl.batteryCharge;
+            }
 
             if (HardwareControl.batteryRate < 0)
                 battery = Properties.Strings.Discharging + ": " + Math.Round(-(decimal)HardwareControl.batteryRate, 1).ToString() + "W";
@@ -1444,24 +1548,6 @@ namespace GHelper
 
         }
 
-
-        public void AutoKeyboard()
-        {
-
-            InputDispatcher.SetBacklightAuto(true);
-
-            if (!AppConfig.Is("skip_aura"))
-            {
-                Aura.ApplyPower();
-                Aura.ApplyAura();
-            }
-
-            if (Program.acpi.IsXGConnected())
-                XGM.Light(AppConfig.Is("xmg_light"));
-
-            if (AppConfig.HasTabletMode()) InputDispatcher.TabletMode();
-
-        }
 
 
         public void VisualizeXGM(int GPUMode = -1)
@@ -1672,20 +1758,25 @@ namespace GHelper
             but.BackColor = but.Enabled ? Color.FromArgb(255, but.BackColor) : Color.FromArgb(100, but.BackColor);
         }
 
-        public void VisualiseBattery(int limit)
+        public void VisualiseBatteryTitle(int limit)
         {
             labelBatteryTitle.Text = Properties.Strings.BatteryChargeLimit + ": " + limit.ToString() + "%";
+        }
+
+        public void VisualiseBattery(int limit)
+        {
+            VisualiseBatteryTitle(limit);
             sliderBattery.Value = limit;
 
             sliderBattery.AccessibleName = Properties.Strings.BatteryChargeLimit + ": " + limit.ToString() + "%";
-            sliderBattery.AccessibilityObject.Select(AccessibleSelection.TakeFocus);
+            //sliderBattery.AccessibilityObject.Select(AccessibleSelection.TakeFocus);
 
             VisualiseBatteryFull();
         }
 
         public void VisualiseBatteryFull()
         {
-            if (AppConfig.Is("charge_full"))
+            if (BatteryControl.chargeFull)
             {
                 buttonBatteryFull.BackColor = colorStandard;
                 buttonBatteryFull.ForeColor = SystemColors.ControlLightLight;

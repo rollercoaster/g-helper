@@ -79,10 +79,10 @@ namespace GHelper.USB
         public static Color Color1 = Color.White;
         public static Color Color2 = Color.Black;
 
-        static bool isACPI = AppConfig.IsTUF() || AppConfig.IsVivoZenbook() || AppConfig.IsProArt();
-        static bool isStrix = AppConfig.IsStrix() && !AppConfig.IsNoDirectRGB();
+        static bool isACPI = AppConfig.IsTUF() || AppConfig.IsVivoZenPro();
+        static bool isStrix = AppConfig.IsAdvancedRGB() && !AppConfig.IsNoDirectRGB();
 
-        static bool isStrix4Zone = AppConfig.IsStrixLimitedRGB();
+        static bool isStrix4Zone = AppConfig.Is4ZoneRGB();
         static bool isStrixNumpad = AppConfig.IsStrixNumpad();
 
         static public bool isSingleColor = false;
@@ -183,7 +183,7 @@ namespace GHelper.USB
                 return _modes;
             }
 
-            if (AppConfig.IsStrix() && !AppConfig.IsStrixLimitedRGB())
+            if (AppConfig.IsAdvancedRGB() && !AppConfig.Is4ZoneRGB())
             {
                 return _modesStrix;
             }
@@ -241,20 +241,20 @@ namespace GHelper.USB
         }
 
 
-        public static byte[] AuraMessage(AuraMode mode, Color color, Color color2, int speed, bool mono = false, byte zoneByte = 0x00)
+        public static byte[] AuraMessage(AuraMode mode, Color color, Color color2, int speed, bool mono = false)
         {
 
             byte[] msg = new byte[17];
             msg[0] = AsusHid.AURA_ID;
             msg[1] = 0xB3;
-            msg[2] = zoneByte; // Zone 
+            msg[2] = 0x00; // Zone 
             msg[3] = (byte)mode; // Aura Mode
             msg[4] = color.R; // R
             msg[5] = mono ? (byte)0 : color.G; // G
             msg[6] = mono ? (byte)0 : color.B; // B
             msg[7] = (byte)speed; // aura.speed as u8;
             msg[8] = 0x00; // aura.direction as u8;
-            msg[9] = mode == AuraMode.AuraBreathe ? (byte)1 : (byte)0;
+            msg[9] = (color.R == 0 && color.G == 0 && color.B == 0) ? (byte)0xFF : (mode == AuraMode.AuraBreathe ? (byte)0x01 : (byte)0x00); // random color flag
             msg[10] = color2.R; // R
             msg[11] = mono ? (byte)0 : color2.G; // G
             msg[12] = mono ? (byte)0 : color2.B; // B
@@ -269,23 +269,14 @@ namespace GHelper.USB
                 new byte[] { AsusHid.AURA_ID, 0x05, 0x20, 0x31, 0, 0x1A },
             }, "Init");
 
-            // Random data AC sends to keyboard on start, that seem to wake up keyboard on 2024 
-            if (AppConfig.IsNewAura())
+            if (AppConfig.IsProArt())
             {
-                AsusHid.Write(new List<byte[]> {
-                    new byte[] { AsusHid.AURA_ID, 0x9F, 0x01 },
-                    new byte[] { AsusHid.AURA_ID, 0xBF },
-
-                    new byte[] { AsusHid.AURA_ID, 0x05, 0x20, 0x31, 0, 0x10 },
-                    new byte[] { AsusHid.AURA_ID, 0x05, 0x20, 0x31, 0, 0x20 },
-
-                    new byte[] { AsusHid.AURA_ID, 0xC0, 0x03, 0x01 },
-                    new byte[] { AsusHid.AURA_ID, 0x9E, 0x01, 0x20 },
-
-                    Encoding.ASCII.GetBytes("]ASUS Tech.Inc."),
-                    new byte[] { AsusHid.AURA_ID, 0x05, 0x20, 0x31, 0, 0x1A },
-                    new byte[] { AsusHid.AURA_ID, 0xC0, 0x00, 0x01 },
-                }, "Init");
+                AsusHid.WriteInput([AsusHid.INPUT_ID, 0x05, 0x20, 0x31, 0x00, 0x08], "ProArt Init");
+                //AsusHid.WriteInput([AsusHid.INPUT_ID, 0xD0, 0x4E], "ProArt Init");
+                AsusHid.WriteInput([AsusHid.INPUT_ID, 0xBA, 0xC5, 0xC4], "ProArt Init");
+                AsusHid.WriteInput([AsusHid.INPUT_ID, 0xD0, 0x8F, 0x01], "ProArt Init");
+                AsusHid.WriteInput([AsusHid.INPUT_ID, 0xD0, 0x85, 0xFF], "ProArt Init");
+                //AsusHid.WriteInput([AsusHid.INPUT_ID, 0xD0, 0x4E], "ProArt Init");
             }
         }
 
@@ -370,37 +361,44 @@ namespace GHelper.USB
             AsusHid.WriteInput(new byte[] { AsusHid.INPUT_ID, 0xD1, 0x09, 0x01, power }, "Aura");
         }
 
+        public static void ApplyPowerOff()
+        {
+            AsusHid.Write(AuraPowerMessage(new AuraPower()));
+        }
+
         public static void ApplyPower()
         {
+
+            bool backlightBattery = AppConfig.IsBacklightZones() && (SystemInformation.PowerStatus.PowerLineStatus != PowerLineStatus.Online);
 
             AuraPower flags = new();
 
             // Keyboard
-            flags.AwakeKeyb = AppConfig.IsNotFalse("keyboard_awake");
+            flags.AwakeKeyb = backlightBattery ? AppConfig.IsOnBattery("keyboard_awake") : AppConfig.IsNotFalse("keyboard_awake");
             flags.BootKeyb = AppConfig.IsNotFalse("keyboard_boot");
             flags.SleepKeyb = AppConfig.IsNotFalse("keyboard_sleep");
             flags.ShutdownKeyb = AppConfig.IsNotFalse("keyboard_shutdown");
 
             // Logo
-            flags.AwakeLogo = AppConfig.IsNotFalse("keyboard_awake_logo");
+            flags.AwakeLogo = backlightBattery ? AppConfig.IsOnBattery("keyboard_awake_logo") : AppConfig.IsNotFalse("keyboard_awake_logo");
             flags.BootLogo = AppConfig.IsNotFalse("keyboard_boot_logo");
             flags.SleepLogo = AppConfig.IsNotFalse("keyboard_sleep_logo");
             flags.ShutdownLogo = AppConfig.IsNotFalse("keyboard_shutdown_logo");
 
             // Lightbar
-            flags.AwakeBar = AppConfig.IsNotFalse("keyboard_awake_bar");
+            flags.AwakeBar = backlightBattery ? AppConfig.IsOnBattery("keyboard_awake_bar") : AppConfig.IsNotFalse("keyboard_awake_bar");
             flags.BootBar = AppConfig.IsNotFalse("keyboard_boot_bar");
             flags.SleepBar = AppConfig.IsNotFalse("keyboard_sleep_bar");
             flags.ShutdownBar = AppConfig.IsNotFalse("keyboard_shutdown_bar");
 
             // Lid
-            flags.AwakeLid = AppConfig.IsNotFalse("keyboard_awake_lid");
+            flags.AwakeLid = backlightBattery ? AppConfig.IsOnBattery("keyboard_awake_lid") : AppConfig.IsNotFalse("keyboard_awake_lid");
             flags.BootLid = AppConfig.IsNotFalse("keyboard_boot_lid");
             flags.SleepLid = AppConfig.IsNotFalse("keyboard_sleep_lid");
             flags.ShutdownLid = AppConfig.IsNotFalse("keyboard_shutdown_lid");
 
             // Rear Bar
-            flags.AwakeRear = AppConfig.IsNotFalse("keyboard_awake_lid");
+            flags.AwakeRear = backlightBattery ? AppConfig.IsOnBattery("keyboard_awake_lid") : AppConfig.IsNotFalse("keyboard_awake_lid");
             flags.BootRear = AppConfig.IsNotFalse("keyboard_boot_lid");
             flags.SleepRear = AppConfig.IsNotFalse("keyboard_sleep_lid");
             flags.ShutdownRear = AppConfig.IsNotFalse("keyboard_shutdown_lid");
@@ -438,8 +436,8 @@ namespace GHelper.USB
            105,  106,  107,  108,  109,  110,  111,  112,  113,  114,  115,  116,  117,  118,  119,  139,  121,  122,  123,  124,  125,
         /* LCTL  LFNC  LWIN  LALT              SPC               RALT  RFNC  RCTL        ARWL  ARWD  ARWR PRT15        NM0   NMPD  NMER  */
            126,  127,  128,  129,              131,              135,  136,  137,        159,  160,  161,  142,        144,  145,  146,
-        /* LB1   LB2   LB3                                                                                             LB4   LB5   LB6   */
-           174,  173,  172,                                                                                            171,  170,  169,
+        /* LB1   LB2   LB3                                                               ARW?  ARWL? ARWD? ARWR?       LB4   LB5   LB6   */
+           174,  173,  172,                                                              120,  140,  141,  143,        171,  170,  169,
         /* KSTN  LOGO  LIDL  LIDR  */
              0,  167,  176,  177,
 
@@ -462,8 +460,8 @@ namespace GHelper.USB
              0,    0,    0,    0,    1,    1,    1,    1,    2,    2,    2,    2,    3,    3,    3,    3,    3,    3,    3,    3,    3,
         /* LCTL  LFNC  LWIN  LALT              SPC               RALT  RFNC  RCTL        ARWL  ARWD  ARWR PRT15        NM0   NMPD  NMER  */
              0,    0,    0,    0,              1,                  2,    2,    2,          3,    3,    3,    3,          3,    3,    3,
-        /* LB1   LB1   LB3                                                                                             LB4   LB5   LB6   */
-             5,    5,    4,                                                                                              6,    7,    7,
+        /* LB1   LB1   LB3                                                               ARW?  ARW?  ARW?  ARW?        LB4   LB5   LB6   */
+             5,    5,    4,                                                                3,    3,    3,    3,          6,    7,    7,
         /* KSTN  LOGO  LIDL  LIDR  */
              3,    0,    0,    3,
 
@@ -486,8 +484,8 @@ namespace GHelper.USB
              0,    0,    0,    0,    0,    1,    1,    1,    1,    1,    2,    2,    2,    2,    2,     2,   3,    3,    3,    3,    3,
         /* LCTL  LFNC  LWIN  LALT              SPC               RALT  RFNC  RCTL        ARWL  ARWD  ARWR PRT15        NM0   NMPD  NMER  */
              0,    0,    0,    0,              1,                  1,    2,    2,          2,    2,    2,    3,          3,    3,    3,
-        /* LB1   LB1   LB3                                                                                             LB4   LB5   LB6   */
-             5,    5,    4,                                                                                              6,    7,    7,
+        /* LB1   LB1   LB3                                                               ARW?  ARW?  ARW?  ARW?        LB4   LB5   LB6   */
+             5,    5,    4,                                                                2,    2,    2,    3,          6,    7,    7,
         /* KSTN  LOGO  LIDL  LIDR  */
              3,    0,    0,    3,
 
@@ -611,6 +609,7 @@ namespace GHelper.USB
             if (init || initDirect)
             {
                 initDirect = false;
+                Init();
                 AsusHid.WriteAura(new byte[] { AsusHid.AURA_ID, 0xbc, 1 });
             }
 
